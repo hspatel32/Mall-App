@@ -1,0 +1,236 @@
+/*
+Name:-   Harsh Shaileshkumar Patel
+ID:      144938206
+E-Mail:- hspatel32@myseneca.ca
+Name:-   Harsh Mittal
+ID:-     146122205
+E-Mail:- hmittal3@myseneca.ca
+Name:-   Dharm Hasmukhlal Pankhania
+ID:-     110362217
+*/
+
+-- 1) SELECT PROCEDURE For Harsh Shaileshkumar:-
+create or replace PROCEDURE SPcustomerinfoSELECT(
+    err_code OUT INTEGER,
+    p_customer_id IN NUMBER,
+    customer_firstName OUT CUSTOMERINFO.CUSTMR_FIRSTNAME%type, 
+customer_lastName OUT CUSTOMERINFO.CUSTMR_LASTNAME%type,  
+customer_address OUT CUSTOMERINFO.CUSTMR_ADDRESS%type
+)
+IS
+BEGIN
+  -- get info based on customer_id
+  SELECT CUSTMR_FIRSTNAME,CUSTMR_LASTNAME,CUSTMR_ADDRESS
+  INTO customer_firstName,customer_lastName,customer_address
+  FROM CUSTOMERINFO
+  WHERE CUSTMR_ID =  p_customer_id;
+
+  ---print information
+  dbms_output.put_line( 'customer_firstName: '||customer_firstName );
+  dbms_output.put_line(  'customer_lastName: '||customer_lastName);
+  dbms_output.put_line(  'customer_address: '||customer_address);
+    err_code := sql%rowcount;
+    
+    EXCEPTION
+        WHEN OTHERS
+            THEN err_code := -1; dbms_output.put_line('NO CUSTOMER FOUND');
+
+END SPcustomerinfoSELECT;
+
+
+-- 2) UPDATE PROCEDURE For Harsh Shaileshkumar:-
+create or replace PROCEDURE SPcustomerinfoUPDATE(
+   --UPDATE ADDRESS FOR A CUSTOMER:-
+err_code OUT INTEGER,
+p_customer_id IN NUMBER,
+ADDRESSIN IN CUSTOMERINFO.CUSTMR_ADDRESS%type)AS 
+BEGIN
+    UPDATE CUSTOMERINFO SET CUSTMR_ADDRESS=ADDRESSIN 
+    WHERE CUSTMR_ID=p_customer_id;
+    err_code := sql%rowcount;
+    COMMIT;
+
+    EXCEPTION
+        WHEN OTHERS
+            THEN err_code := -1; dbms_output.put_line('CUSTOMER ID ALREADY EXIST/CANNOT INSERT');
+END;
+
+-- 3) DELETE PROCEDURE For Harsh Shaileshkumar:-
+create or replace PROCEDURE SPcustomerinfoDELETE(
+    err_code OUT NUMBER,
+    p_customer_id IN CUSTOMERINFO.CUSTMR_ID%type
+) AS
+    result NUMBER;
+BEGIN
+  
+    DELETE FROM CUSTOMERINFO
+    WHERE CUSTMR_ID = p_customer_id;
+
+    result := SQL%ROWCOUNT;
+    DBMS_OUTPUT.PUT_LINE('Rows deleted: ' || result);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Customer with id ' || p_customer_id || ' does not exist');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+END;
+
+
+-- 4) INSERT PROCEDURE For Harsh Shaileshkumar;-
+create or replace PROCEDURE SPcustomerinfoINSERT(
+     err_code OUT NUMBER,
+     P_customer_id IN CUSTOMERINFO.CUSTMR_ID%type,
+     first_name IN CUSTOMERINFO.CUSTMR_FIRSTNAME%type,
+     last_name IN CUSTOMERINFO.CUSTMR_LASTNAME%type,
+     order_num IN CUSTOMERINFO.ORDER_NUMBER%type,
+     address IN CUSTOMERINFO.CUSTMR_ADDRESS%type
+)AS 
+BEGIN        
+     INSERT INTO CUSTOMERINFO(CUSTMR_ID,CUSTMR_FIRSTNAME,CUSTMR_LASTNAME,ORDER_NUMBER,CUSTMR_ADDRESS)
+     VALUES(P_customer_id,first_name,last_name,order_num,address);
+       
+     err_code:= sql%rowcount;
+     COMMIT;
+      
+     EXCEPTION
+       WHEN OTHERS THEN err_code:=-1;
+END;
+
+-- 1) Dharam's INSERT orderdetails:-
+create or replace PROCEDURE SPorderdetailsINSERT(
+     err_code OUT NUMBER,
+     m_order_number IN ORDERDETAILS.ORDER_NUMBER%type,
+     m_order_date IN ORDERDETAILS.ORDER_DATE%type,
+     store_id IN ORDERDETAILS.STORE_ID%type,
+     orderline IN ORDERDETAILS.ORDERLINENUMBER%type,
+     qty IN ORDERDETAILS.QUANTITY%type
+)AS 
+BEGIN        
+     INSERT INTO ORDERDETAILS(ORDER_NUMBER,ORDER_DATE,STORE_ID,ORDERLINENUMBER,QUANTITY)
+     VALUES(m_order_number,m_order_date,store_id,orderline,qty);
+
+     err_code:= sql%rowcount;
+     COMMIT;
+
+     EXCEPTION
+       WHEN OTHERS THEN err_code:=-1;
+END;
+
+-- 2) Dharam's UPDATE orderdetails:-
+create or replace PROCEDURE SPorderdetailsUPDATE(
+err_code OUT INTEGER,
+m_order_number IN ORDERDETAILS.ORDER_NUMBER%type,
+qty IN ORDERDETAILS.QUANTITY%type)AS 
+BEGIN
+    UPDATE ORDERDETAILS SET QUANTITY=qty 
+    WHERE ORDER_NUMBER = m_order_number;
+    err_code := sql%rowcount;
+    COMMIT;
+
+    EXCEPTION
+        WHEN OTHERS
+            THEN err_code := -1; dbms_output.put_line('ORDER NUMBER ALREADY EXIST/CANNOT INSERT');
+END;
+
+--3) Dharam's SELECT orderdetails:-
+create or replace PROCEDURE SPorderdetailsSELECT(
+    err_code OUT INTEGER,
+    m_order_number IN ORDERDETAILS.ORDER_NUMBER%type,
+    m_order_date OUT ORDERDETAILS.ORDER_DATE%type,
+    store_id OUT ORDERDETAILS.STORE_ID%type,
+    orderline OUT ORDERDETAILS.ORDERLINENUMBER%type,
+    qty OUT ORDERDETAILS.QUANTITY%type
+)
+AS
+BEGIN
+  -- get contact based on customer id
+  SELECT ORDER_DATE,STORE_ID,ORDERLINENUMBER,QUANTITY
+  INTO m_order_date,store_id,orderline,qty
+  FROM ORDERDETAILS
+  WHERE ORDER_NUMBER =  m_order_number;
+
+  ---print out information
+  dbms_output.put_line( 'Order Date: '||m_order_date );
+  dbms_output.put_line(  'Store ID: '||store_id);
+  dbms_output.put_line( 'OrderLine Number: '||orderline );
+  dbms_output.put_line(  'Total Quantity: '||qty);
+    err_code := sql%rowcount;
+
+    EXCEPTION
+        WHEN OTHERS
+            THEN err_code := -1; dbms_output.put_line('NO CUSTOMER FOUND');
+
+END;
+
+-- 4) Dharam's DELETE orderdetails:-
+create or replace PROCEDURE SPorderdetailsDELETE(
+    err_code OUT NUMBER,
+    m_order_number IN ORDERDETAILS.ORDER_NUMBER%type
+) AS
+BEGIN
+
+    DELETE FROM ORDERDETAILS
+    WHERE ORDER_NUMBER = m_order_number;
+
+    err_code:= sql%rowcount;
+     COMMIT;
+   -- DBMS_OUTPUT.PUT_LINE('Rows deleted: ' || result);
+--EXCEPTION
+   -- WHEN NO_DATA_FOUND THEN
+       -- DBMS_OUTPUT.PUT_LINE('Customer with id ' || p_customer_id || ' does not exist');
+   -- WHEN OTHERS THEN
+        --DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+END;
+
+--Harsh Mittal's spEmployeeInsert
+create or replace PROCEDURE spEmployeeInsert (
+   err_code OUT INTEGER,
+   m_employee_ID IN EMPLOYEE.EMPLOYEE_ID%type,
+   m_store_ID IN EMPLOYEE.STORE_ID%TYPE,
+   m_employee_name IN EMPLOYEE.EMPLOYEE_NAME%type,
+   m_employee_job IN EMPLOYEE.EMPLOYEE_JOB%type,
+   m_salary IN EMPLOYEE.SALARY%type
+   
+) AS
+BEGIN
+    INSERT INTO EMPLOYEE (EMPLOYEE_ID,STORE_ID, EMPLOYEE_NAME, EMPLOYEE_JOB, SALARY)
+    VALUES (m_employee_ID,m_store_ID,m_employee_name,m_employee_job,m_salary);
+
+    err_code := sql%rowcount;
+    COMMIT;
+
+    EXCEPTION
+        WHEN OTHERS
+        THEN err_code := -1;
+        dbms_output.put_line('PRIMARY KEY EXISTS/CANNOT INSERT');
+END;
+
+
+--Harsh Mittal's spEmployeeSELECT
+CREATE OR REPLACE PROCEDURE spEmployeeSELECT (
+    p_employee_id IN EMPLOYEE.EMPLOYEE_ID%TYPE,
+    p_store_id IN EMPLOYEE.STORE_ID%TYPE,
+    employee_name OUT EMPLOYEE.EMPLOYEE_NAME%TYPE,
+    employee_job OUT EMPLOYEE.EMPLOYEE_JOB%TYPE,
+    salary OUT EMPLOYEE.SALARY%TYPE,
+    err_code OUT INTEGER
+)
+IS
+BEGIN
+  -- get employee information based on employee id
+  SELECT EMPLOYEE_NAME, EMPLOYEE_JOB, SALARY
+  INTO employee_name, employee_job, salary
+  FROM EMPLOYEE
+  WHERE EMPLOYEE_ID = p_employee_id;
+
+  -- print out employee's information
+  dbms_output.put_line( 'Employee Name: ' || employee_name );
+  dbms_output.put_line( 'Employee Job: ' || employee_job );
+  dbms_output.put_line( 'Salary: ' || salary );
+  err_code := sql%rowcount;
+    
+EXCEPTION
+  WHEN OTHERS THEN 
+    err_code := -1; 
+    dbms_output.put_line('NO EMPLOYEE FOUND');
+END spEmployeeSELECT;
